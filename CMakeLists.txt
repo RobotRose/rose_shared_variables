@@ -1,0 +1,42 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(shared_variables)
+
+find_package(catkin REQUIRED COMPONENTS
+                    roscpp
+                    rose20_common)
+
+
+find_package(Boost REQUIRED)
+
+set(CMAKE_CXX_FLAGS "-std=c++0x -fPIC -g")
+
+catkin_package(
+    INCLUDE_DIRS include
+    LIBRARIES shared_variables
+    CATKIN_DEPENDS roscpp
+    DEPENDS rose20_common
+)
+
+include_directories(${PROJECT_SOURCE_DIR}/include ${catkin_INCLUDE_DIRS} )
+
+add_library(shared_variables SHARED src/shared_variables.cpp )
+target_link_libraries(shared_variables ${catkin_LIBRARIES})
+
+add_executable(test_read_client  src/test_read_client.cpp)
+target_link_libraries(test_read_client ${catkin_LIBRARIES} shared_variables)
+
+add_executable(test_write_client  src/test_write_client.cpp)
+target_link_libraries(test_write_client ${catkin_LIBRARIES} shared_variables)
+
+add_executable(test_server  src/test_server.cpp)
+target_link_libraries(test_server ${catkin_LIBRARIES} shared_variables)
+
+#############
+## Testing ##
+#############
+
+## Add gtest based cpp test target and link libraries
+# catkin_add_gtest(${PROJECT_NAME}-utest test/test.cpp)
+# if(TARGET ${PROJECT_NAME}-utest)
+#   target_link_libraries(${PROJECT_NAME}-utest ${PROJECT_NAME})
+# endif()
