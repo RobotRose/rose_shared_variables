@@ -37,11 +37,12 @@ public:
 	typedef typename Shareable<T>::shareableType  			shareableType;
 	typedef typename Shareable<T>::shareableTypeConstPtr  	shareableTypeConstPtr;
 
-	SharedVariable(const std::string& ns, const std::string& variable_name, const bool& is_server = false, const bool& use_updates = true)
+	SharedVariable(const std::string& ns, const std::string& variable_name, const bool& is_server = false, const bool& read_only = true, const bool& use_updates = true)
 		: ns_(ns)
 		, variable_name_(variable_name)
 		, is_server_(is_server)
 		, use_updates_(use_updates)
+		, read_only_(read_only)
 	{
 		n_ = ros::NodeHandle();
 		service_name_get_ 		= getServiceGetName(ns_, variable_name_);
@@ -131,7 +132,7 @@ private:
 		if(!remoteAvailable(service_client_get_))
 			return false;
 
-		auto& ref  		= shared_variable_.getRef();
+		auto ref  		= shared_variable_.getRef();
 		auto& response 	= shared_variable_.getRef();
 		if ( service_client_get_.call(ref, response, ros::message_traits::MD5Sum<shareableType>::value()) )
 		{
@@ -154,8 +155,9 @@ private:
 
 		auto& ref  		= shared_variable_.getRef();
 		auto& response 	= shared_variable_.getRef();
+		auto before  	= shared_variable_.get();
 		if ( service_client_set_.call(ref, response, ros::message_traits::MD5Sum<shareableType>::value()) )
-				return true;
+			return (before == shared_variable_.get()); 	// Only return ture if the variable has succesfully been changed to requested value
 		else
 			return false;
 	}
@@ -174,6 +176,10 @@ private:
 	// Is invoked at the server when an client calls its 'set variable' service
 	bool CB_set(shareableType & req, shareableType & res)
 	{
+		// If this variable is read onyl do not alter it on a request by the client
+		if(read_only_)
+			return false;
+
 		ROS_DEBUG_NAMED(ROS_NAME, "Received an shared variable 'set' request.");
 		shared_variable_.getRef() = req;
 		res = shared_variable_.getRef(); 
@@ -227,6 +233,7 @@ private:
 private:
 	bool is_server_;
 	bool use_updates_;
+	bool read_only_;
 
 	std::string ns_;
 	std::string variable_name_;
