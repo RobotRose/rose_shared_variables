@@ -72,9 +72,7 @@ public:
 	}
 
 	~SharedVariable()
-	{
-		printf("Destructing shared variable.");
-	};
+	{};
 
 	bool set(const T& value)
 	{
@@ -98,6 +96,8 @@ public:
 		return true;
 	}
 
+	// Call with a certain ros::Duration(x) in order to get a cached version of the variable if available.
+	// The duration indeicates the max age of the cached variable
 	T get(ros::Duration max_age = ros::Duration(-1))
 	{
 		// The client has to update if the varaiable age is too high
@@ -110,11 +110,6 @@ public:
 				ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable '%s', using old value.", variable_name_.c_str());
 		}
 
-		return shared_variable_.get();
-	}
-
-	T getCached()
-	{
 		return shared_variable_.get();
 	}
 
