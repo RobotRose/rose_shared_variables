@@ -39,15 +39,12 @@ public:
 	SharedVariables()
 	{
 		ns_ = ros::this_node::getNamespace();
-		printf("ns_ = %s", ns_.c_str());
 	}
 
 	~SharedVariables()
-	{
-		printf("Destructing shared variables.");
-	}
+	{}
 
-	bool hostSharedVariable(const std::string& variable_name)
+	bool hostSharedVariable(const std::string& variable_name, const bool& publish_updates)
 	{
 		// Create a server shared variable
 		if(!isUnique(ns_, variable_name))

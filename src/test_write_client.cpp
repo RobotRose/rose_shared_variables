@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 		
 		
 		ROS_INFO_NAMED(ROS_NAME, "Int is: %d", shared_integers["shared_integer"]->get());
-		ros::Duration(2.0).sleep();
+		ros::Duration(5.0).sleep();
 		ros::spinOnce();
 	} while(ros::ok());
 

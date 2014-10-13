@@ -37,10 +37,11 @@ public:
 	typedef typename Shareable<T>::shareableType  			shareableType;
 	typedef typename Shareable<T>::shareableTypeConstPtr  	shareableTypeConstPtr;
 
-	SharedVariable(const std::string& ns, const std::string& variable_name, const bool& is_server = false)
+	SharedVariable(const std::string& ns, const std::string& variable_name, const bool& is_server = false, const bool& use_updates = false)
 		: ns_(ns)
 		, variable_name_(variable_name)
 		, is_server_(is_server)
+		, use_updates_(use_updates)
 	{
 		n_ = ros::NodeHandle();
 		service_name_get_ 		= getServiceGetName(ns_, variable_name_);
@@ -51,23 +52,29 @@ public:
 		{
 			// Create a server side shared variable
 			service_server_get_ = createServiceServer(n_, service_name_get_, boost::bind(&SharedVariable::CB_get ,this, _1, _2));
-			ROS_INFO_NAMED(ROS_NAME, "Created get service get server at '%s'.", service_name_get_.c_str());
+			ROS_INFO_NAMED(ROS_NAME, "Shared variable server created get service get server at '%s'.", service_name_get_.c_str());
 			service_server_set_ = createServiceServer(n_, service_name_set_, boost::bind(&SharedVariable::CB_set ,this, _1, _2));
-			ROS_INFO_NAMED(ROS_NAME, "Created get service set server at '%s'.", service_name_set_.c_str());
+			ROS_INFO_NAMED(ROS_NAME, "Shared variable server created get service set server at '%s'.", service_name_set_.c_str());
 
-			updates_publisher_ = n_.advertise<shareableType>(topic_name_updates_, 100, true);
-			ROS_INFO_NAMED(ROS_NAME, "Client subscribed to topic '%s' for updates.", topic_name_updates_.c_str());
+			if(use_updates_)
+			{
+				updates_publisher_ = n_.advertise<shareableType>(topic_name_updates_, 100, true);
+				ROS_INFO_NAMED(ROS_NAME, "Shared variable server publisher advertised to topic '%s' for updates.", topic_name_updates_.c_str());
+			}
 		}
 		else
 		{
 			// Create a client side shared variable
 			service_client_get_ = createServiceClient(n_, service_name_get_);
 			service_client_set_ = createServiceClient(n_, service_name_set_);
-			ROS_INFO_NAMED(ROS_NAME, "Created get service get client at '%s'.", service_name_get_.c_str());
-			ROS_INFO_NAMED(ROS_NAME, "Created get service set client at '%s'.", service_name_set_.c_str());
+			ROS_INFO_NAMED(ROS_NAME, "Shared variable client created get client at '%s'.", service_name_get_.c_str());
+			ROS_INFO_NAMED(ROS_NAME, "Shared variable client created set client at '%s'.", service_name_set_.c_str());
 
-			updates_subscriber_ = n_.subscribe<shareableType>(topic_name_updates_, 100, &SharedVariable::CB_update, this);
-			ROS_INFO_NAMED(ROS_NAME, "Client subscribed to topic '%s' for updates.", topic_name_updates_.c_str());
+			if(use_updates_)
+			{
+				updates_subscriber_ = n_.subscribe<shareableType>(topic_name_updates_, 100, &SharedVariable::CB_update, this);
+				ROS_INFO_NAMED(ROS_NAME, "Shared variable client subscribed to topic '%s' for updates.", topic_name_updates_.c_str());
+			}
 		}
 	}
 
@@ -79,8 +86,9 @@ public:
 		if(is_server_)
 		{
 			shared_variable_.set(value);
-			updates_publisher_.publish(shared_variable_.getRef());
-			ROS_INFO("Send shared_variable_ %d update.", value);
+			
+			if(use_updates_)
+				updates_publisher_.publish(shared_variable_.getRef());
 		}
 		else
 		{
@@ -90,7 +98,6 @@ public:
 				ROS_WARN_NAMED(ROS_NAME, "Could not set remote variable '%s', not setting value.", variable_name_.c_str());
 				return false;
 			}
-
 		}
 
 		return true;
@@ -104,7 +111,7 @@ public:
 		bool update_required = (ros::Time::now() - max_age) > last_update_received_;
 
 		// The server always returns its local version
-		if( not is_server_ and update_required)
+		if( not is_server_ and update_required )
 		{
 			if(!getRemote())
 				ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable '%s', using old value.", variable_name_.c_str());
@@ -117,47 +124,31 @@ private:
 	// This function will be invoked by a client in order to get the state of the variable from the server
 	bool getRemote()
 	{
-		ROS_INFO("getRemote shared_variable_ %d", shared_variable_.get());
-		
 		// Check if remote is available
 		if(!remoteAvailable(service_client_get_))
 			return false;
 
-		auto ref  = shared_variable_.getRef();
-		auto response = shared_variable_.getRef();
-		if ( service_client_get_.call(ref, ref, ros::message_traits::MD5Sum<shareableType>::value()) )
-		{
-			ROS_INFO("Called get %d", shared_variable_.get());
+		auto& ref  		= shared_variable_.getRef();
+		auto& response 	= shared_variable_.getRef();
+		if ( service_client_get_.call(ref, response, ros::message_traits::MD5Sum<shareableType>::value()) )
 			return true;
-		}
 		else
-		{
-			ROS_INFO("Could not call get %d", shared_variable_.get());	
 			return false;
-		}
 	}
 
 	// This function will be invoked by a client in order to change the variable at the server
 	bool setRemote()
 	{
-		ROS_INFO("setRemote shared_variable_ %d", shared_variable_.get());
-		
 		// Check if remote is available
 		if(!remoteAvailable(service_client_get_))
 			return false;
 
-		auto ref  = shared_variable_.getRef();
-		auto response = shared_variable_.getRef();
-		if ( service_client_set_.call(ref, ref, ros::message_traits::MD5Sum<shareableType>::value()) )
-		{
-			ROS_INFO("Called set %d", shared_variable_.get());
-			return true;
-		}
+		auto& ref  		= shared_variable_.getRef();
+		auto& response 	= shared_variable_.getRef();
+		if ( service_client_set_.call(ref, response, ros::message_traits::MD5Sum<shareableType>::value()) )
+				return true;
 		else
-		{
-			ROS_INFO("Could not call set %d", shared_variable_.get());	
 			return false;
-		}
 	}
 
 	bool remoteAvailable(ros::ServiceClient& service_client, const ros::Duration& timeout = ros::Duration(1.0))
@@ -171,20 +162,21 @@ private:
 		return true;
 	}	
 
-	// Is invoked at the server when an client calls its set variable service
+	// Is invoked at the server when an client calls its 'set variable' service
 	bool CB_set(shareableType & req, shareableType & res)
 	{
-		ROS_INFO_NAMED(ROS_NAME, "CB_set %d", req.data);
 		shared_variable_.getRef() = req;
 		res = shared_variable_.getRef(); 
-		updates_publisher_.publish(shared_variable_.getRef());
+		
+		if(use_updates_)
+			updates_publisher_.publish(shared_variable_.getRef());
+		
 		return true;
 	}
 
-	// Is invoked at the server when an client calls its get variable service
+	// Is invoked at the server when an client calls its 'get variable' service
 	bool CB_get(shareableType & req, shareableType & res)
 	{
-		ROS_INFO_NAMED(ROS_NAME, "CB_get %d", req.data);
 		res = shared_variable_.getRef();
 		return true;
 	} 
@@ -192,7 +184,6 @@ private:
 	// Is invoked at the client when the server sends an update of this variable via pub/sub
 	void CB_update(const shareableTypeConstPtr & update)
 	{
-		ROS_INFO_NAMED(ROS_NAME, "CB_update");
 		shared_variable_.getRef() = *update;
 
 		// Store the time of the last update
@@ -223,6 +214,7 @@ private:
 
 private:
 	bool is_server_;
+	bool use_updates_;
 
 	std::string ns_;
 	std::string variable_name_;

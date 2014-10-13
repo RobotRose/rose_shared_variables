@@ -25,13 +25,14 @@ int main(int argc, char *argv[])
 	printf("Started shared variable test server.\n");
 	
 	SharedVariables<int> shared_integers;
-	shared_integers.hostSharedVariable("shared_integer");
+	shared_integers.hostSharedVariable("shared_integer", true);
 
 	do{
-		printf("Setting to 42\n");
-		shared_integers["shared_integer"]->set(42);
+		shared_integers["shared_integer"]->set(shared_integers["shared_integer"]->get() + 1);
 
-		ros::Duration(2.0).sleep();
+		ROS_INFO_NAMED(ROS_NAME, "Int is: %d", shared_integers["shared_integer"]->get());
+
+		ros::Duration(0.1).sleep();
 		ros::spinOnce();
 	} while(ros::ok());
 	
