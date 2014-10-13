@@ -95,15 +95,6 @@ public:
     	return shared_var;
     }
 
-    std::vector<std::shared_ptr<SharedVariable<T>>>& all()
-    {
-    	std::vector<std::shared_ptr<SharedVariable<T>>>  all_shared_variabled;
-    	std::transform( shared_variables_.begin(), shared_variables_.end(),
-                   		std::back_inserter(all_shared_variabled),
-                   		boost::bind(&std::map<std::pair<std::string, std::string>, std::shared_ptr<SharedVariable<T>>>::value_type::second, _1) );
-    	return all_shared_variabled;
-    }
-
 private:
 	bool isUnique(const std::string& ns, const std::string& variable_name)
 	{
