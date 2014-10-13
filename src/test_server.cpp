@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 	printf("Started shared variable test server.\n");
 	
 	SharedVariables<int> shared_integers;
-	shared_integers.hostSharedVariable("shared_integer", true);
+	shared_integers.hostSharedVariable("shared_integer", false);
 
 	do{
 		shared_integers["shared_integer"]->set(shared_integers["shared_integer"]->get() + 1);

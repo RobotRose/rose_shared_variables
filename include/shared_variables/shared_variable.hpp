@@ -108,11 +108,12 @@ public:
 	T get(ros::Duration max_age = ros::Duration(-1))
 	{
 		// The client has to update if the varaiable age is too high
-		bool update_required = (ros::Time::now() - max_age) > last_update_received_;
+		bool update_required = (ros::Time::now() - last_update_received_) > max_age;
 
 		// The server always returns its local version
 		if( not is_server_ and update_required )
 		{
+			ROS_DEBUG_NAMED(ROS_NAME, "Timeout, aksing for update to shared variable server.");
 			if(!getRemote())
 				ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable '%s', using old value.", variable_name_.c_str());
 		}
@@ -124,6 +125,8 @@ private:
 	// This function will be invoked by a client in order to get the state of the variable from the server
 	bool getRemote()
 	{
+		ROS_DEBUG_NAMED(ROS_NAME, "Getting an shared variable using the 'set' request.");
+		
 		// Check if remote is available
 		if(!remoteAvailable(service_client_get_))
 			return false;
@@ -131,7 +134,11 @@ private:
 		auto& ref  		= shared_variable_.getRef();
 		auto& response 	= shared_variable_.getRef();
 		if ( service_client_get_.call(ref, response, ros::message_traits::MD5Sum<shareableType>::value()) )
+		{
+			// Store the time of the last update
+			last_update_received_ = ros::Time::now();
 			return true;
+		}
 		else
 			return false;
 	}
@@ -139,6 +146,8 @@ private:
 	// This function will be invoked by a client in order to change the variable at the server
 	bool setRemote()
 	{
+		ROS_DEBUG_NAMED(ROS_NAME, "Setting an shared variable using the 'set' request.");
+
 		// Check if remote is available
 		if(!remoteAvailable(service_client_get_))
 			return false;
@@ -155,7 +164,7 @@ private:
 	{
 		if(!service_client_get_.waitForExistence(timeout))
 		{
-			ROS_INFO_NAMED(ROS_NAME, "Could not communicate with service client '%s', is it up and running?", service_client.getService().c_str());
+			ROS_WARN_NAMED(ROS_NAME, "Could not communicate with service client '%s', is it up and running?", service_client.getService().c_str());
 			return false;
 		}
 
@@ -165,6 +174,7 @@ private:
 	// Is invoked at the server when an client calls its 'set variable' service
 	bool CB_set(shareableType & req, shareableType & res)
 	{
+		ROS_DEBUG_NAMED(ROS_NAME, "Received an shared variable 'set' request.");
 		shared_variable_.getRef() = req;
 		res = shared_variable_.getRef(); 
 		
@@ -177,6 +187,7 @@ private:
 	// Is invoked at the server when an client calls its 'get variable' service
 	bool CB_get(shareableType & req, shareableType & res)
 	{
+		ROS_DEBUG_NAMED(ROS_NAME, "Received an shared variable 'get' request.");
 		res = shared_variable_.getRef();
 		return true;
 	} 
@@ -184,6 +195,7 @@ private:
 	// Is invoked at the client when the server sends an update of this variable via pub/sub
 	void CB_update(const shareableTypeConstPtr & update)
 	{
+		ROS_DEBUG_NAMED(ROS_NAME, "Update of shared variable received from server.");
 		shared_variable_.getRef() = *update;
 
 		// Store the time of the last update
