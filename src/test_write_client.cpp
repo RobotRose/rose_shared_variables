@@ -27,11 +27,11 @@ int main(int argc, char *argv[])
 	shared_integers.connectToSharedVariable("shared_integer");
 
 	do{
-		shared_integers["shared_integer"]->set(100);
+		// shared_integers["shared_integer"]->set(100);
 		
 		
 		ROS_INFO_NAMED(ROS_NAME, "Int is: %d", shared_integers["shared_integer"]->get());
-		ros::Duration(5.0).sleep();
+		ros::Duration(0.1).sleep();
 		ros::spinOnce();
 	} while(ros::ok());
 

@@ -44,7 +44,7 @@ public:
 	~SharedVariables()
 	{}
 
-	bool hostSharedVariable(const std::string& variable_name, const bool& publish_updates)
+	bool hostSharedVariable(const std::string& variable_name, const bool& use_updates = true)
 	{
 		// Create a server shared variable
 		if(!isUnique(ns_, variable_name))
@@ -57,18 +57,18 @@ public:
 			return false;
 		}
 
-		shared_variables_[getNameVarPair(ns_, variable_name)] = std::shared_ptr<SharedVariable<T>>(new SharedVariable<T>(ns_, variable_name, true));
+		shared_variables_[getNameVarPair(ns_, variable_name)] = std::shared_ptr<SharedVariable<T>>(new SharedVariable<T>(ns_, variable_name, true, use_updates));
 		
 		return true;
 	}
 
-	bool connectToSharedVariable(const std::string& variable_name)
+	bool connectToSharedVariable(const std::string& variable_name, const bool& use_updates = true)
 	{
 		// Create a client shared variable
 		if(!isUnique(ns_, variable_name))
 			return false;
 
-		shared_variables_[getNameVarPair(ns_, variable_name)] = std::shared_ptr<SharedVariable<T>>(new SharedVariable<T>(ns_, variable_name, false));
+		shared_variables_[getNameVarPair(ns_, variable_name)] = std::shared_ptr<SharedVariable<T>>(new SharedVariable<T>(ns_, variable_name, false, use_updates));
 
 		return true;
 	}

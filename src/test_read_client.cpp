@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	auto timeout = ros::Duration(2.0);
 	do{
 		ROS_INFO_NAMED(ROS_NAME, "Int is: %d", shared_integers["shared_integer"]->get(timeout));
-		ros::Duration(0.5).sleep();
+		ros::Duration(3.0).sleep();
 		ros::spinOnce();
 	} while(ros::ok());
 

@@ -37,7 +37,7 @@ public:
 	typedef typename Shareable<T>::shareableType  			shareableType;
 	typedef typename Shareable<T>::shareableTypeConstPtr  	shareableTypeConstPtr;
 
-	SharedVariable(const std::string& ns, const std::string& variable_name, const bool& is_server = false, const bool& use_updates = false)
+	SharedVariable(const std::string& ns, const std::string& variable_name, const bool& is_server = false, const bool& use_updates = true)
 		: ns_(ns)
 		, variable_name_(variable_name)
 		, is_server_(is_server)
