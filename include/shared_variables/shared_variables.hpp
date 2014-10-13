@@ -56,7 +56,7 @@ public:
 		// Check if another server is already advertising this variable name in this namespace
 		if(ros::service::exists(getServiceGetName(ns_, variable_name), false))
 		{
-			ROS_ERROR_NAMED(ROS_NAME, "A shared variable '%s' already exists for node '%s'.", variable_name.c_str(), ns_.c_str());
+			ROS_ERROR_NAMED(ROS_NAME, "A shared variable '%s' already exists in namespace '%s', aborting.", variable_name.c_str(), ns_.c_str());
 			return false;
 		}
 
