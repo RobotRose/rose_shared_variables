@@ -16,6 +16,12 @@
 namespace shared_variables
 {
 
+
+std::string getConcatenatedName(const std::string& ns, const std::string& variable_name)
+{
+	return (ns + "/shared_variables/" + variable_name);
+}
+
 std::string getServiceGetName(const std::string& ns, const std::string& variable_name)
 {
 	return (ns + "/shared_variables/" + variable_name + "_get");

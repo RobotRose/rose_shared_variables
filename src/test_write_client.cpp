@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	printf("Started shared variable read client.\n");
 
 	SharedVariables<int> shared_integers;
-	shared_integers.connectToSharedVariable("shared_integer");
+	shared_integers.connect("shared_integer");
 
 	int i = 0;
 	do{
@@ -37,6 +37,8 @@ int main(int argc, char *argv[])
 		
 		
 		ROS_INFO_NAMED(ROS_NAME, "Int is: %d", shared_integers["shared_integer"]->get());
+		ROS_INFO_NAMED(ROS_NAME, "Looping");
+		
 		ros::Duration(0.1).sleep();
 		ros::spinOnce();
 	} while(ros::ok());

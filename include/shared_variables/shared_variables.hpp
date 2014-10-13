@@ -28,7 +28,7 @@
 #include "shared_variables/shared_bool.hpp"
 #include "shared_variables/shared_int32_t.hpp"
 #include "shared_variables/shared_string.hpp"
-
+#include "shared_variables/shared_vector.hpp"
 
 namespace shared_variables
 {
@@ -45,7 +45,7 @@ public:
 	~SharedVariables()
 	{}
 
-	bool hostSharedVariable(const std::string& variable_name, const bool& read_only = true, const bool& use_updates = true)
+	bool host(const std::string& variable_name, const bool& read_only = true, const bool& use_updates = true)
 	{
 		// Create a server shared variable
 		if(!isUnique(ns_, variable_name))
@@ -63,25 +63,13 @@ public:
 		return true;
 	}
 
-	bool connectToSharedVariable(const std::string& variable_name, const bool& read_only = true, const bool& use_updates = true)
+	bool connect(const std::string& variable_name, const bool& read_only = true, const bool& use_updates = true)
 	{
 		// Create a client shared variable
 		if(!isUnique(ns_, variable_name))
 			return false;
 
 		shared_variables_[getNameVarPair(ns_, variable_name)] = std::shared_ptr<SharedVariable<T>>(new SharedVariable<T>(ns_, variable_name, false, read_only, use_updates));
-
-		return true;
-	}
-
-	bool isUnique(const std::string& ns, const std::string& variable_name)
-	{
-		// Check if we ourself already have a shared variable by that name
-		if(shared_variables_.find(getNameVarPair(ns, variable_name)) != shared_variables_.end())
-		{
-			ROS_ERROR_NAMED(ROS_NAME, "A shared variable '%s' already exists for node '%s', overwriting.", variable_name.c_str(), ns.c_str());
-			return false;
-		}
 
 		return true;
 	}
@@ -93,8 +81,41 @@ public:
 
     std::shared_ptr<SharedVariable<T>> operator[](const std::string& variable_name)
     {
-    	return shared_variables_.at(getNameVarPair(ns_, variable_name));	
+    	std::shared_ptr<SharedVariable<T>> shared_var;
+    	try
+		{
+		    shared_var = shared_variables_.at(getNameVarPair(ns_, variable_name));
+		}
+		catch (std::out_of_range& oor)
+		{
+		    ROS_ERROR_NAMED(ROS_NAME, "Error while trying to get variable '%s' from shared variables", getConcatenatedName(ns_, variable_name).c_str());
+		    throw oor;
+		}
+
+    	return shared_var;
     }
+
+    std::vector<std::shared_ptr<SharedVariable<T>>>& all()
+    {
+    	std::vector<std::shared_ptr<SharedVariable<T>>>  all_shared_variabled;
+    	std::transform( shared_variables_.begin(), shared_variables_.end(),
+                   		std::back_inserter(all_shared_variabled),
+                   		boost::bind(&std::map<std::pair<std::string, std::string>, std::shared_ptr<SharedVariable<T>>>::value_type::second, _1) );
+    	return all_shared_variabled;
+    }
+
+private:
+	bool isUnique(const std::string& ns, const std::string& variable_name)
+	{
+		// Check if we ourself already have a shared variable by that name
+		if(shared_variables_.find(getNameVarPair(ns, variable_name)) != shared_variables_.end())
+		{
+			ROS_ERROR_NAMED(ROS_NAME, "A shared variable '%s' already exists for node '%s', overwriting.", variable_name.c_str(), ns.c_str());
+			return false;
+		}
+
+		return true;
+	}
 
 private:
 	std::string ns_;

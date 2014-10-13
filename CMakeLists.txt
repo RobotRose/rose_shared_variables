@@ -3,7 +3,8 @@ project(shared_variables)
 
 find_package(catkin REQUIRED COMPONENTS
                     roscpp
-                    rose20_common)
+                    rose20_common
+                    luctor_classes)
 
 
 find_package(Boost REQUIRED)
@@ -13,8 +14,8 @@ set(CMAKE_CXX_FLAGS "-std=c++0x -fPIC -g")
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES shared_variables
-    CATKIN_DEPENDS roscpp
-    DEPENDS rose20_common
+    CATKIN_DEPENDS roscpp rose20_common luctor_classes
+    DEPENDS 
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/include ${catkin_INCLUDE_DIRS} )

@@ -25,6 +25,8 @@
 #include "shared_variables/common.hpp"
 #include "shared_variables/shareable.hpp"
 
+#include <csignal> // or signal.h if C code
+
 
 namespace shared_variables
 {
@@ -34,8 +36,8 @@ class SharedVariable : public Shareable<T>
 {
 public:
 	// Typedefs of the shareableTypes Shareable<T>
+	typedef typename Shareable<T>::localType  				localType;
 	typedef typename Shareable<T>::shareableType  			shareableType;
-	typedef typename Shareable<T>::shareableTypeConstPtr  	shareableTypeConstPtr;
 
 	SharedVariable(const std::string& ns, const std::string& variable_name, const bool& is_server = false, const bool& read_only = true, const bool& use_updates = true)
 		: ns_(ns)
@@ -82,10 +84,11 @@ public:
 	~SharedVariable()
 	{};
 
-	bool set(const T& value)
+	bool set(const localType& value)
 	{
 		if(is_server_)
 		{
+			// raise(SIGINT);
 			shared_variable_.set(value);
 			
 			if(use_updates_)
@@ -106,7 +109,7 @@ public:
 
 	// Call with a certain ros::Duration(x) in order to get a cached version of the variable if available.
 	// The duration indeicates the max age of the cached variable
-	T get(ros::Duration max_age = ros::Duration(-1))
+	localType get(ros::Duration max_age = ros::Duration(-1))
 	{
 		// The client has to update if the varaiable age is too high
 		bool update_required = (ros::Time::now() - last_update_received_) > max_age;
@@ -126,7 +129,7 @@ private:
 	// This function will be invoked by a client in order to get the state of the variable from the server
 	bool getRemote()
 	{
-		ROS_DEBUG_NAMED(ROS_NAME, "Getting an shared variable using the 'set' request.");
+		ROS_DEBUG_NAMED(ROS_NAME, "Getting an shared variable using the 'get' service.");
 		
 		// Check if remote is available
 		if(!remoteAvailable(service_client_get_))
@@ -147,7 +150,7 @@ private:
 	// This function will be invoked by a client in order to change the variable at the server
 	bool setRemote()
 	{
-		ROS_DEBUG_NAMED(ROS_NAME, "Setting an shared variable using the 'set' request.");
+		ROS_DEBUG_NAMED(ROS_NAME, "Setting an shared variable using the 'set' service.");
 
 		// Check if remote is available
 		if(!remoteAvailable(service_client_get_))
@@ -180,7 +183,7 @@ private:
 		if(read_only_)
 			return false;
 
-		ROS_DEBUG_NAMED(ROS_NAME, "Received an shared variable 'set' request.");
+		ROS_DEBUG_NAMED(ROS_NAME, "Received an shared variable 'set' service request.");
 		shared_variable_.getRef() = req;
 		res = shared_variable_.getRef(); 
 		
@@ -193,13 +196,13 @@ private:
 	// Is invoked at the server when an client calls its 'get variable' service
 	bool CB_get(shareableType & req, shareableType & res)
 	{
-		ROS_DEBUG_NAMED(ROS_NAME, "Received an shared variable 'get' request.");
+		ROS_DEBUG_NAMED(ROS_NAME, "Received an shared variable 'get' service request.");
 		res = shared_variable_.getRef();
 		return true;
 	} 
 
 	// Is invoked at the client when the server sends an update of this variable via pub/sub
-	void CB_update(const shareableTypeConstPtr & update)
+	void CB_update(const boost::shared_ptr<shareableType const>&  update)
 	{
 		ROS_DEBUG_NAMED(ROS_NAME, "Update of shared variable received from server.");
 		shared_variable_.getRef() = *update;
@@ -241,7 +244,7 @@ private:
 	std::string service_name_set_;
 	std::string topic_name_updates_;
 
-	Shareable<T> shared_variable_;
+	Shareable<T> 		shared_variable_;
 	
 	ros::NodeHandle 	n_;
 	ros::ServiceClient 	service_client_get_;
@@ -253,6 +256,8 @@ private:
 	ros::Publisher 		updates_publisher_;
 
 	ros::Time 			last_update_received_;
+
+	std::weak_ptr<T> 	linked_variable_;
 };
 
 }; // namespace shared_variables 

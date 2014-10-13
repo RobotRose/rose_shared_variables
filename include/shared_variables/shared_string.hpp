@@ -30,6 +30,15 @@ public:
 	Shareable()
 	{}
 
+	Shareable(const localType& init_var)
+	{
+		set(init_var);
+	}
+
+	Shareable(const shareableType& init_var)
+		: shared_variable_(init_var)
+	{}
+
 	localType get()
 	{
 		return shared_variable_.data; 

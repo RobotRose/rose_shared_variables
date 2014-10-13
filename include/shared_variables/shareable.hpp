@@ -19,19 +19,12 @@ namespace shared_variables
 
 #define SHAREABLE_SPECIALIZATION(l, s) 	    \
 	typedef l 				localType; 			\
-	typedef s 				shareableType;			\
-	typedef s::ConstPtr 	shareableTypeConstPtr;
+	typedef s 				shareableType;			//\
+	// typedef s::ConstPtr 	shareableTypeConstPtr;
 
-// Base Class
-class ShareableBaseClass
-{
-	public:
-		ShareableBaseClass()
-		{}
-};
 
 template<typename T>
-class Shareable : public ShareableBaseClass
+class Shareable
 {
 public:
 	Shareable()
