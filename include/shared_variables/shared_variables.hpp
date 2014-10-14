@@ -22,6 +22,8 @@
 #include <ros/ros.h>
 #include <ros/service.h>
 
+#include <roscomm/conversion_bool.hpp>
+#include <roscomm/conversion_bool_list.hpp>
 #include <roscomm/conversion_int32_t.hpp>
 #include <roscomm/conversion_int32_t_list.hpp>
 
