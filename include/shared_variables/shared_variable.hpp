@@ -25,9 +25,6 @@
 #include "shared_variables/common.hpp"
 #include "shared_variables/shareable.hpp"
 
-#include <csignal> // or signal.h if C code
-
-
 namespace shared_variables
 {
 
@@ -86,17 +83,14 @@ public:
 
 	bool set(const localType& value)
 	{
+		shared_variable_.set(value);
 		if(is_server_)
 		{
-			// raise(SIGINT);
-			shared_variable_.set(value);
-			
 			if(use_updates_)
 				updates_publisher_.publish(shared_variable_.getRef());
 		}
 		else
 		{
-			shared_variable_.set(value);
 			if(!setRemote())
 			{
 				ROS_WARN_NAMED(ROS_NAME, "Could not set remote variable '%s', not setting value.", variable_name_.c_str());
