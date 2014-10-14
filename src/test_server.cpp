@@ -14,7 +14,7 @@
 #include <ros/ros.h>
 #include "ros/service_server.h"
 
-#include "shared_variables/shared_variables.hpp"
+#include "shared_variables/shared_variable.hpp"
 
 using namespace shared_variables;
 
@@ -24,13 +24,13 @@ int main(int argc, char *argv[])
 	ros::NodeHandle n;
 	printf("Started shared variable test server.\n");
 	
-	SharedVariables<int> shared_integers;
-	shared_integers.host("shared_integer", true, true);
+	SharedVariable<int> shared_integer("shared_integer");
+	shared_integer.host( false);
 
-	SharedVariables<std::vector<int>> shared_integer_list;
+	// SharedVariables<std::vector<int>> shared_integer_list;
 	// SharedVariables<std::vector<std::vector<int>>> shared_integer_list;
 	// SharedVariables<std::vector<std::vector<std::vector<int>>>> shared_integer_list;
-	shared_integer_list.host("shared_integer_list");
+	// shared_integer_list.host("shared_integer_list");
 
 	std::vector<int> intlijsta;
 	intlijsta.push_back(42);
@@ -65,19 +65,17 @@ int main(int argc, char *argv[])
 	list_of_lists_of_lists.push_back(list_of_listsa);
 	list_of_lists_of_lists.push_back(list_of_listsb);
 
-	shared_integers["shared_integer"]->set(1);
-
 	do{
-		shared_integers["shared_integer"]->set(shared_integers["shared_integer"]->get() + 1);
-		shared_integer_list["shared_integer_list"]->set(intlijsta);
+		shared_integer = shared_integer + 1;
+		// shared_integer_list["shared_integer_list"] = intlijsta;
 		// shared_integer_list["shared_integer_list"]->set(list_of_lists);
 		// shared_integer_list["shared_integer_list"]->set(list_of_lists_of_lists);
 
-		// intlijst.push_back(shared_integers["shared_integer"]->get());
+		// intlijst.push_back(shared_integer->get());
 
-		// ROS_INFO_NAMED(ROS_NAME, "Int is: %d", shared_integers["shared_integer"]->get());
+		// ROS_INFO_NAMED(ROS_NAME, "Int is: %d", shared_integer->get());
 
-		ROS_INFO_NAMED(ROS_NAME, "Looping");
+		ROS_INFO_NAMED(ROS_NAME, "Looping %d", (int)shared_integer);
 
 		ros::Duration(0.1).sleep();
 		ros::spinOnce();

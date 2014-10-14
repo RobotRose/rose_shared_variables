@@ -16,24 +16,24 @@
 namespace shared_variables
 {
 
-	std::string getConcatenatedName(const std::string& ns, const std::string& variable_name)
+	std::string getSharedVariableName(ros::NodeHandle& n, const std::string& variable_name)
 	{
-		return (ns + "/shared_variables/" + variable_name);
+		return n.resolveName("/shared_variables/" + variable_name);
 	}
 
-	std::string getServiceGetName(const std::string& ns, const std::string& variable_name)
+	std::string getServiceGetName(ros::NodeHandle& n, const std::string& variable_name)
 	{
-		return (ns + "/shared_variables/" + variable_name + "_get");
+		return n.resolveName("/shared_variables/" + variable_name + "/get");
 	}
 
-	std::string getServiceSetName(const std::string& ns, const std::string& variable_name)
+	std::string getServiceSetName(ros::NodeHandle& n, const std::string& variable_name)
 	{
-		return (ns + "/shared_variables/" + variable_name + "_set");
+		return n.resolveName("/shared_variables/" + variable_name + "/set");
 	}
 
-	std::string getUpdateTopicName(const std::string& ns, const std::string& variable_name)
+	std::string getUpdateTopicName(ros::NodeHandle& n, const std::string& variable_name)
 	{
-		return (ns + "/shared_variables/" + variable_name + "_updates");
+		return n.resolveName("/shared_variables/" + variable_name + "/updates");
 	}
 
 }; // namespace shared_variables

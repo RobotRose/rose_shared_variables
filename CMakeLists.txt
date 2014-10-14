@@ -20,7 +20,7 @@ catkin_package(
 
 include_directories(${PROJECT_SOURCE_DIR}/include ${catkin_INCLUDE_DIRS} )
 
-add_library(shared_variables SHARED src/shared_variables.cpp
+add_library(shared_variables SHARED src/shared_variable.cpp
 									src/common.cpp )
 target_link_libraries(shared_variables ${catkin_LIBRARIES})
 

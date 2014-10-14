@@ -10,10 +10,11 @@
 *	description
 * 
 ***********************************************************************************/
+#include <random>
 
 #include <ros/ros.h>
 
-#include "shared_variables/shared_variables.hpp"
+#include "shared_variables/shared_variable.hpp"
 
 using namespace shared_variables;
 
@@ -23,21 +24,24 @@ int main(int argc, char *argv[])
 	ros::NodeHandle n;
 	printf("Started shared variable read client.\n");
 
-	SharedVariables<int> shared_integers;
-	shared_integers.connect("shared_integer");
-
+	SharedVariable<int> shared_integer("shared_integer");
+	shared_integer.connect(false);
+	std::default_random_engine generator;
+	
 	int i = 0;
 	do{
 		if(i++%50 == 0)
 		{
 
-			ROS_INFO_NAMED(ROS_NAME, "Setting to 100!");
-			shared_integers["shared_integer"]->set(100);
+			std::uniform_int_distribution<int> distribution(-6516,6464168);
+			int dice_roll = distribution(generator);  // generates number in the range 1..6 
+
+			ROS_INFO_NAMED(ROS_NAME, "Setting to %d!", dice_roll);
+			shared_integer = dice_roll;
 		}
 		
 		
-		ROS_INFO_NAMED(ROS_NAME, "Int is: %d", shared_integers["shared_integer"]->get());
-		ROS_INFO_NAMED(ROS_NAME, "Looping");
+		ROS_INFO_NAMED(ROS_NAME, "Last set int is: %d", (int)shared_integer);
 		
 		ros::Duration(0.1).sleep();
 		ros::spinOnce();

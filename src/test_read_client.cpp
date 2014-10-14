@@ -13,7 +13,7 @@
 
 #include <ros/ros.h>
 
-#include "shared_variables/shared_variables.hpp"
+#include "shared_variables/shared_variable.hpp"
 
 #include <geometry_msgs/Point.h>
 
@@ -25,22 +25,24 @@ int main(int argc, char *argv[])
 	ros::NodeHandle n;
 	printf("Started shared variable read client.\n");
 
-	auto timeout = ros::Duration(2.0);
+	auto timeout = ros::Duration(1.0);
 
-	SharedVariables<int> shared_integers;
-	shared_integers.connect("shared_integer");
-
-	SharedVariables<std::vector<int>> shared_integer_list;
+	// shared_integers.connect("shared_integer");
+	SharedVariable<int> test_sv("shared_integer");
+	test_sv.connect();
+	// SharedVariables<std::vector<int>> shared_integer_list;
 	// SharedVariables<std::vector<std::vector<int>>> shared_integer_list;
 	// SharedVariables<std::vector<std::vector<std::vector<int>>>> shared_integer_list;
-	shared_integer_list.connect("shared_integer_list");
+	// shared_integer_list.connect("shared_integer_list");
 
 	std::vector<int> list;
 	std::vector<std::vector<int>> list_of_lists;
 	std::vector<std::vector<std::vector<int>>> list_of_lists_of_lists;
 
 	do{
-		list = shared_integer_list["shared_integer_list"]->get();
+		int a = 0;
+		a = test_sv;//shared_integers["shared_integer"];
+		// list = shared_integer_list["shared_integer_list"];
 		// list_of_lists = shared_integer_list["shared_integer_list"]->get();
 		// list_of_lists_of_lists = shared_integer_list["shared_integer_list"]->get();
 
@@ -58,7 +60,8 @@ int main(int argc, char *argv[])
 		// }
 			
 
-		ROS_INFO_NAMED(ROS_NAME, "Looping %d", shared_integers["shared_integer"]->get());
+		ROS_INFO_NAMED(ROS_NAME, "Looping %d", (int)test_sv);//shared_integers["shared_integer"]);
+		ROS_INFO_NAMED(ROS_NAME, "Looping %d", a);
 		ros::Duration(0.1).sleep();
 		ros::spinOnce();
 	} while(ros::ok());
