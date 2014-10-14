@@ -23,18 +23,16 @@
 #include <rose20_common/ros_name.hpp>
 
 #include "shared_variables/common.hpp"
-#include "shared_variables/shareable.hpp"
 
 namespace shared_variables
 {
 
 template <typename T>
-class SharedVariable : public Shareable<T>
+class SharedVariable
 {
 public:
-	// Typedefs of the shareableTypes Shareable<T>
-	typedef typename Shareable<T>::localType  				localType;
-	typedef typename Shareable<T>::shareableType  			shareableType;
+	typedef typename ros::conversion::convert<T>::nativeType 	nativeType;
+	typedef typename ros::conversion::convert<T>::messageType 	messageType;
 
 	SharedVariable(const std::string& ns, const std::string& variable_name, const bool& is_server = false, const bool& read_only = true, const bool& use_updates = true)
 		: ns_(ns)
@@ -43,7 +41,7 @@ public:
 		, use_updates_(use_updates)
 		, read_only_(read_only)
 	{
-		n_ = ros::NodeHandle();
+		n_ 						= ros::NodeHandle();
 		service_name_get_ 		= getServiceGetName(ns_, variable_name_);
 		service_name_set_ 		= getServiceSetName(ns_, variable_name_);
 		topic_name_updates_   	= getUpdateTopicName(ns_, variable_name_);
@@ -58,7 +56,7 @@ public:
 
 			if(use_updates_)
 			{
-				updates_publisher_ = n_.advertise<shareableType>(topic_name_updates_, 100, true);
+				updates_publisher_ = n_.advertise<messageType>(topic_name_updates_, 100, true);
 				ROS_INFO_NAMED(ROS_NAME, "Shared variable server publisher advertised to topic '%s' for updates.", topic_name_updates_.c_str());
 			}
 		}
@@ -72,7 +70,7 @@ public:
 
 			if(use_updates_)
 			{
-				updates_subscriber_ = n_.subscribe<shareableType>(topic_name_updates_, 100, &SharedVariable::CB_update, this);
+				updates_subscriber_ = n_.subscribe<messageType>(topic_name_updates_, 100, &SharedVariable::CB_update, this);
 				ROS_INFO_NAMED(ROS_NAME, "Shared variable client subscribed to topic '%s' for updates.", topic_name_updates_.c_str());
 			}
 		}
@@ -81,13 +79,12 @@ public:
 	~SharedVariable()
 	{};
 
-	bool set(const localType& value)
+	bool set(const nativeType& value)
 	{
-		shared_variable_.set(value);
+		shared_variable_ = value;
 		if(is_server_)
 		{
-			if(use_updates_)
-				updates_publisher_.publish(shared_variable_.getRef());
+			publishUpdate();
 		}
 		else
 		{
@@ -103,7 +100,7 @@ public:
 
 	// Call with a certain ros::Duration(x) in order to get a cached version of the variable if available.
 	// The duration indeicates the max age of the cached variable
-	localType get(ros::Duration max_age = ros::Duration(-1))
+	nativeType get(ros::Duration max_age = ros::Duration(-1))
 	{
 		// The client has to update if the varaiable age is too high
 		bool update_required = (ros::Time::now() - last_update_received_) > max_age;
@@ -116,7 +113,7 @@ public:
 				ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable '%s', using old value.", variable_name_.c_str());
 		}
 
-		return shared_variable_.get();
+		return shared_variable_;
 	}
 
 private:
@@ -129,10 +126,11 @@ private:
 		if(!remoteAvailable(service_client_get_))
 			return false;
 
-		auto ref  		= shared_variable_.getRef();
-		auto& response 	= shared_variable_.getRef();
-		if ( service_client_get_.call(ref, response, ros::message_traits::MD5Sum<shareableType>::value()) )
+		auto ref  		= ros::conversion::convert<T>().get(shared_variable_);
+		auto response 	= ros::conversion::convert<T>().get(shared_variable_);;
+		if ( service_client_get_.call(ref, response, ros::message_traits::MD5Sum<messageType>::value()) )
 		{
+			shared_variable_ = ros::conversion::convert<T>().get(response);
 			// Store the time of the last update
 			last_update_received_ = ros::Time::now();
 			return true;
@@ -150,11 +148,13 @@ private:
 		if(!remoteAvailable(service_client_get_))
 			return false;
 
-		auto& ref  		= shared_variable_.getRef();
-		auto& response 	= shared_variable_.getRef();
-		auto before  	= shared_variable_.get();
-		if ( service_client_set_.call(ref, response, ros::message_traits::MD5Sum<shareableType>::value()) )
-			return (before == shared_variable_.get()); 	// Only return ture if the variable has succesfully been changed to requested value
+		auto ref  						= ros::conversion::convert<T>().get(shared_variable_);
+		auto response 					= ros::conversion::convert<T>().get(shared_variable_);
+		if ( service_client_set_.call(ref, response, ros::message_traits::MD5Sum<messageType>::value()) )
+		{
+			shared_variable_ = ros::conversion::convert<T>().get(response);
+			return true;
+		}
 		else
 			return false;
 	}
@@ -171,57 +171,61 @@ private:
 	}	
 
 	// Is invoked at the server when an client calls its 'set variable' service
-	bool CB_set(shareableType & req, shareableType & res)
+	bool CB_set(messageType & req, messageType & res)
 	{
 		// If this variable is read onyl do not alter it on a request by the client
 		if(read_only_)
 			return false;
 
 		ROS_DEBUG_NAMED(ROS_NAME, "Received an shared variable 'set' service request.");
-		shared_variable_.getRef() = req;
-		res = shared_variable_.getRef(); 
-		
-		if(use_updates_)
-			updates_publisher_.publish(shared_variable_.getRef());
+		shared_variable_ 	= ros::conversion::convert<T>().get(req);
+		res 				= ros::conversion::convert<T>().get(shared_variable_); 
 		
 		return true;
 	}
 
 	// Is invoked at the server when an client calls its 'get variable' service
-	bool CB_get(shareableType & req, shareableType & res)
+	bool CB_get(messageType & req, messageType & res)
 	{
 		ROS_DEBUG_NAMED(ROS_NAME, "Received an shared variable 'get' service request.");
-		res = shared_variable_.getRef();
+		res = ros::conversion::convert<T>().get(shared_variable_);
 		return true;
 	} 
 
 	// Is invoked at the client when the server sends an update of this variable via pub/sub
-	void CB_update(const boost::shared_ptr<shareableType const>&  update)
+	void CB_update(const boost::shared_ptr<messageType const>&  update)
 	{
 		ROS_DEBUG_NAMED(ROS_NAME, "Update of shared variable received from server.");
-		shared_variable_.getRef() = *update;
+		shared_variable_ = ros::conversion::convert<T>().get(*update);
 
 		// Store the time of the last update
 		last_update_received_ = ros::Time::now();
 	}
 
+	// The server uses this to publish updates of the shared variable
+	void publishUpdate()
+	{
+		if(use_updates_)
+			updates_publisher_.publish(ros::conversion::convert<T>().get(shared_variable_));
+	}
+
 	ros::ServiceClient createServiceClient(ros::NodeHandle& n, const std::string& service_name)
 	{
 		bool persistent = false;
-		ros::ServiceClientOptions ops(service_name,  ros::message_traits::MD5Sum<shareableType>::value(), persistent, ros::M_string());
+		ros::ServiceClientOptions ops(service_name,  ros::message_traits::MD5Sum<messageType>::value(), persistent, ros::M_string());
      	return n.serviceClient(ops);
 	}
 
-	ros::ServiceServer createServiceServer(ros::NodeHandle& n, const std::string& service_name, const boost::function<bool(shareableType&, shareableType&)>& _callback)
+	ros::ServiceServer createServiceServer(ros::NodeHandle& n, const std::string& service_name, const boost::function<bool(messageType&, messageType&)>& _callback)
 	{
 		ros::AdvertiseServiceOptions ops;
 
     	ops.service 		= service_name;
-	    ops.md5sum 			= ros::message_traits::MD5Sum<shareableType>::value();
-	    ops.datatype 		= ros::message_traits::datatype<shareableType>();
-	    ops.req_datatype 	= ros::message_traits::datatype<shareableType>();
-	    ops.res_datatype 	= ros::message_traits::datatype<shareableType>();
-	    ops.helper 			= ros::ServiceCallbackHelperPtr(new ros::ServiceCallbackHelperT<ros::ServiceSpec<shareableType, shareableType> >(_callback));
+	    ops.md5sum 			= ros::message_traits::MD5Sum<messageType>::value();
+	    ops.datatype 		= ros::message_traits::datatype<messageType>();
+	    ops.req_datatype 	= ros::message_traits::datatype<messageType>();
+	    ops.res_datatype 	= ros::message_traits::datatype<messageType>();
+	    ops.helper 			= ros::ServiceCallbackHelperPtr(new ros::ServiceCallbackHelperT<ros::ServiceSpec<messageType, messageType> >(_callback));
 	    ops.tracked_object 	= ros::VoidConstPtr();
 	    
 	    return n.advertiseService(ops);
@@ -238,7 +242,7 @@ private:
 	std::string service_name_set_;
 	std::string topic_name_updates_;
 
-	Shareable<T> 		shared_variable_;
+	nativeType			shared_variable_;
 	
 	ros::NodeHandle 	n_;
 	ros::ServiceClient 	service_client_get_;
@@ -250,8 +254,6 @@ private:
 	ros::Publisher 		updates_publisher_;
 
 	ros::Time 			last_update_received_;
-
-	std::weak_ptr<T> 	linked_variable_;
 };
 
 }; // namespace shared_variables 

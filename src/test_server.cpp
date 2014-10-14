@@ -25,11 +25,11 @@ int main(int argc, char *argv[])
 	printf("Started shared variable test server.\n");
 	
 	SharedVariables<int> shared_integers;
-	shared_integers.host("shared_integer", true, false);
+	shared_integers.host("shared_integer", true, true);
 
-	// SharedVariables<std::vector<int>> shared_integer_list;
+	SharedVariables<std::vector<int>> shared_integer_list;
 	// SharedVariables<std::vector<std::vector<int>>> shared_integer_list;
-	SharedVariables<std::vector<std::vector<std::vector<int>>>> shared_integer_list;
+	// SharedVariables<std::vector<std::vector<std::vector<int>>>> shared_integer_list;
 	shared_integer_list.host("shared_integer_list");
 
 	std::vector<int> intlijsta;
@@ -65,11 +65,13 @@ int main(int argc, char *argv[])
 	list_of_lists_of_lists.push_back(list_of_listsa);
 	list_of_lists_of_lists.push_back(list_of_listsb);
 
+	shared_integers["shared_integer"]->set(1);
+
 	do{
 		shared_integers["shared_integer"]->set(shared_integers["shared_integer"]->get() + 1);
+		shared_integer_list["shared_integer_list"]->set(intlijsta);
 		// shared_integer_list["shared_integer_list"]->set(list_of_lists);
-		shared_integer_list["shared_integer_list"]->set(list_of_lists_of_lists);
-		// shared_integer_list["shared_integer_list"]->set(intlijsta);
+		// shared_integer_list["shared_integer_list"]->set(list_of_lists_of_lists);
 
 		// intlijst.push_back(shared_integers["shared_integer"]->get());
 

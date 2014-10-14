@@ -22,13 +22,11 @@
 #include <ros/ros.h>
 #include <ros/service.h>
 
+#include <roscomm/conversion_int32_t.hpp>
+#include <roscomm/conversion_int32_t_list.hpp>
+
 #include "shared_variables/common.hpp"
 #include "shared_variables/shared_variable.hpp"
-
-#include "shared_variables/shared_bool.hpp"
-#include "shared_variables/shared_int32_t.hpp"
-#include "shared_variables/shared_string.hpp"
-#include "shared_variables/shared_vector.hpp"
 
 namespace shared_variables
 {

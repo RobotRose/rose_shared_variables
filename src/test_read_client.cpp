@@ -15,6 +15,8 @@
 
 #include "shared_variables/shared_variables.hpp"
 
+#include <geometry_msgs/Point.h>
+
 using namespace shared_variables;
 
 int main(int argc, char *argv[])
@@ -28,9 +30,9 @@ int main(int argc, char *argv[])
 	SharedVariables<int> shared_integers;
 	shared_integers.connect("shared_integer");
 
-	// SharedVariables<std::vector<int>> shared_integer_list;
+	SharedVariables<std::vector<int>> shared_integer_list;
 	// SharedVariables<std::vector<std::vector<int>>> shared_integer_list;
-	SharedVariables<std::vector<std::vector<std::vector<int>>>> shared_integer_list;
+	// SharedVariables<std::vector<std::vector<std::vector<int>>>> shared_integer_list;
 	shared_integer_list.connect("shared_integer_list");
 
 	std::vector<int> list;
@@ -38,28 +40,40 @@ int main(int argc, char *argv[])
 	std::vector<std::vector<std::vector<int>>> list_of_lists_of_lists;
 
 	do{
-		// list = shared_integer_list["shared_integer_list"]->get();
+		list = shared_integer_list["shared_integer_list"]->get();
 		// list_of_lists = shared_integer_list["shared_integer_list"]->get();
-		list_of_lists_of_lists = shared_integer_list["shared_integer_list"]->get();
+		// list_of_lists_of_lists = shared_integer_list["shared_integer_list"]->get();
 
-		int i = 0;
-		for(const auto& list_of_lists : list_of_lists_of_lists)
-		{
-			ROS_INFO_NAMED(ROS_NAME, "Level 1 inlist #%d", i++);
-			int j = 0;
-			for(const auto& list : list_of_lists)
-			{
-				ROS_INFO_NAMED(ROS_NAME, " Level 2 intlist #%d", j++);
+		// int i = 0;
+		// for(const auto& list_of_lists : list_of_lists_of_lists)
+		// {
+		// 	ROS_INFO_NAMED(ROS_NAME, "Level 1 inlist #%d", i++);
+		// 	int j = 0;
+		// 	for(const auto& list : list_of_lists)
+		// 	{
+		// 		ROS_INFO_NAMED(ROS_NAME, " Level 2 intlist #%d", j++);
 				for(const auto& integer : list)
 					ROS_INFO_NAMED(ROS_NAME, "  Intlijst int is: %d", integer);
-			}
-		}
+		// 	}
+		// }
 			
 
 		ROS_INFO_NAMED(ROS_NAME, "Looping %d", shared_integers["shared_integer"]->get());
 		ros::Duration(0.1).sleep();
 		ros::spinOnce();
 	} while(ros::ok());
+
+
+	int i = 42;
+	std_msgs::Int32 msg;
+
+	std_msgs::Int32 int32_msg;
+	int integer;
+
+	int32_msg 				= ros::conversion::convert<int>().get(i);
+	std_msgs::String p		= ros::conversion::special_convert<int, std_msgs::String>().get(i);
+	integer  				= ros::conversion::convert<int>().get(msg);
+
 
 
 	return 0;
