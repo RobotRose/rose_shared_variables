@@ -29,11 +29,11 @@ int main(int argc, char *argv[])
 
 	// shared_integers.connect("shared_integer");
 	SharedVariable<int> test_sv("shared_integer");
-	test_sv.connect();
-	// SharedVariables<std::vector<int>> shared_integer_list;
+	test_sv.connect(ros::Duration(2.0));
+	SharedVariable<std::vector<int>> shared_integer_list("shared_integer_list");
 	// SharedVariables<std::vector<std::vector<int>>> shared_integer_list;
 	// SharedVariables<std::vector<std::vector<std::vector<int>>>> shared_integer_list;
-	// shared_integer_list.connect("shared_integer_list");
+	shared_integer_list.connect(ros::Duration(2.0));
 
 	std::vector<int> list;
 	std::vector<std::vector<int>> list_of_lists;
@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
 
 	do{
 		int a = 0;
-		a = test_sv;//shared_integers["shared_integer"];
-		// list = shared_integer_list["shared_integer_list"];
+		// a = test_sv;
+		list = shared_integer_list;
 		// list_of_lists = shared_integer_list["shared_integer_list"]->get();
 		// list_of_lists_of_lists = shared_integer_list["shared_integer_list"]->get();
 
@@ -60,8 +60,8 @@ int main(int argc, char *argv[])
 		// }
 			
 
-		ROS_INFO_NAMED(ROS_NAME, "Looping %d", (int)test_sv);//shared_integers["shared_integer"]);
-		ROS_INFO_NAMED(ROS_NAME, "Looping %d", a);
+		// ROS_INFO_NAMED(ROS_NAME, "Looping %d", (int)test_sv);//shared_integers["shared_integer"]);
+		// ROS_INFO_NAMED(ROS_NAME, "Looping %d", a);
 		ros::Duration(0.1).sleep();
 		ros::spinOnce();
 	} while(ros::ok());

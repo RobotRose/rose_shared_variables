@@ -25,12 +25,12 @@ int main(int argc, char *argv[])
 	printf("Started shared variable test server.\n");
 	
 	SharedVariable<int> shared_integer("shared_integer");
-	shared_integer.host( false);
+	shared_integer.host(false, false);
 
-	// SharedVariables<std::vector<int>> shared_integer_list;
+	SharedVariable<std::vector<int>> shared_integer_list("shared_integer_list");
 	// SharedVariables<std::vector<std::vector<int>>> shared_integer_list;
 	// SharedVariables<std::vector<std::vector<std::vector<int>>>> shared_integer_list;
-	// shared_integer_list.host("shared_integer_list");
+	shared_integer_list.host(false, true);
 
 	std::vector<int> intlijsta;
 	intlijsta.push_back(42);
@@ -64,18 +64,22 @@ int main(int argc, char *argv[])
 	std::vector<std::vector<std::vector<int>>> list_of_lists_of_lists;
 	list_of_lists_of_lists.push_back(list_of_listsa);
 	list_of_lists_of_lists.push_back(list_of_listsb);
+	shared_integer = 0;
 
+	shared_integer_list.MyFunction();
 	do{
-		shared_integer = shared_integer + 1;
-		// shared_integer_list["shared_integer_list"] = intlijsta;
+		// shared_integer = shared_integer + 1;
+		shared_integer_list = intlijsta;
+		shared_integer_list[1] = 100;
+		// shared_integer_list.push_back(4);
 		// shared_integer_list["shared_integer_list"]->set(list_of_lists);
 		// shared_integer_list["shared_integer_list"]->set(list_of_lists_of_lists);
-
+		// shared_integer_list[2] = 3;
 		// intlijst.push_back(shared_integer->get());
 
 		// ROS_INFO_NAMED(ROS_NAME, "Int is: %d", shared_integer->get());
 
-		ROS_INFO_NAMED(ROS_NAME, "Looping %d", (int)shared_integer);
+		// ROS_INFO_NAMED(ROS_NAME, "Looping %d", (int)shared_integer);
 
 		ros::Duration(0.1).sleep();
 		ros::spinOnce();

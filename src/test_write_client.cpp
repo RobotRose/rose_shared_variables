@@ -32,8 +32,7 @@ int main(int argc, char *argv[])
 	do{
 		if(i++%50 == 0)
 		{
-
-			std::uniform_int_distribution<int> distribution(-6516,6464168);
+			std::uniform_int_distribution<int> distribution(0,100);
 			int dice_roll = distribution(generator);  // generates number in the range 1..6 
 
 			ROS_INFO_NAMED(ROS_NAME, "Setting to %d!", dice_roll);
