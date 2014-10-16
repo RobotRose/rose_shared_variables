@@ -47,9 +47,6 @@ template <typename T, typename E = T>
 class SharedVariable
 {
 public:
-	typedef typename ros::conversion::convert<T>::nativeType 	nativeType;
-	typedef typename ros::conversion::convert<T>::messageType 	messageType;
-
 	SharedVariable()
 		: shared_value_(new T())
 	{}
@@ -57,15 +54,13 @@ public:
 	SharedVariable(const std::string& variable_name)
 		: shared_value_(new T())
 	{
-        // shared_value_ 			= std::shared_ptr<T>(new T());
-		update_engine_ 			= std::shared_ptr<UpdateEngine<T>>(new UpdateEngine<T>(variable_name, *shared_value_));
+		update_engine_ = std::shared_ptr<UpdateEngine<T>>(new UpdateEngine<T>(variable_name, *shared_value_));
 	}
 
 	SharedVariable(T* shared_value, std::shared_ptr<UpdateEngine<E>> update_engine)
 		: update_engine_(update_engine)
 		, shared_value_(shared_value)
-	{
-	}
+	{}
 
 	~SharedVariable()
 	{};
@@ -93,7 +88,7 @@ public:
 
 	// Call with a certain ros::Duration(x) in order to get a cached version of the variable if available.
 	// The duration indicates the max age of the cached variable
-	SharedVariable<T, E>& get()
+	const T& get()
 	{
 		update_engine_->get();
 		return *this;
@@ -112,7 +107,7 @@ public:
 	}
 
 	// Assignment from native type
-	SharedVariable<T, E>& operator=(nativeType rhs)
+	SharedVariable<T, E>& operator=(T rhs)
 	{
 		ROS_INFO("Assignment operator SharedVariable");
 	 	*shared_value_ = rhs;
