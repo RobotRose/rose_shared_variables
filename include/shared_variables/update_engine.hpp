@@ -29,8 +29,9 @@ public:
 		, value_(value)
 		, is_server_(false)
 		, is_client_(false)
-		, use_updates_(false)
 		, read_only_(true)
+		, use_updates_(false)
+		, publish_rate_(ros::Rate(0.0))
 	{
 		n_ 						= ros::NodeHandle();
 		shared_name_			= getSharedVariableName(n_, variable_name_);
@@ -42,7 +43,7 @@ public:
 	~UpdateEngine()
 	{}
 
-	bool host(const bool& read_only = true, const bool& use_updates = true)
+	bool host(const bool& read_only, const bool& use_updates, const ros::Rate& publish_rate)
 	{
 		if(is_client_)
 		{
@@ -67,6 +68,7 @@ public:
 		read_only_ 		= read_only;
 		use_updates_ 	= use_updates;
 		is_server_ 		= true;
+		publish_rate_ 	= publish_rate;
 		
 		// Create publisher if we use the updates topic
 		if(use_updates_)
@@ -206,8 +208,10 @@ public:
 	// The server uses this to publish updates of the shared variable
 	bool publishUpdate()
 	{
-		if(use_updates_)
+		// Only publish if enabled and mange the publishing rate
+		if(use_updates_ && ros::Time::now() - prev_publish_time_ > publish_rate_.expectedCycleTime())
         {
+        	prev_publish_time_ = ros::Time::now();
             ROS_INFO_NAMED(ROS_NAME, "Publishing shared variable update via '%s'.", topic_name_updates_.c_str());
 			updates_publisher_.publish(ros::conversion::convert<T>().get(value_));
         }
@@ -308,7 +312,9 @@ private:
 	ros::Publisher 		updates_publisher_;
 
 	ros::Time 			last_update_received_;
+	ros::Time 			prev_publish_time_;
 	ros::Duration 		max_age_;
+	ros::Rate 			publish_rate_;
 
 };
 

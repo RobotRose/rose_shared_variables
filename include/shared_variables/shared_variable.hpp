@@ -61,9 +61,9 @@ public:
 	~SharedVariable()
 	{};
 
-	bool host(const bool& read_only = true, const bool& use_updates = true)
+	bool host(const bool& read_only = true, const bool& use_updates = true, const ros::Rate& publish_rate = ros::Rate(10.0))
 	{
-		return update_engine_->host(read_only, use_updates);
+		return update_engine_->host(read_only, use_updates, publish_rate);
 	}
 
 	bool connect(const ros::Duration& max_age = ros::Duration(-1))
@@ -111,7 +111,7 @@ public:
 		return *this;
 	}
 
-	operator T&()
+	operator const T&()
 	{
 		ROS_DEBUG_NAMED(ROS_NAME, "Conversion operator: operator T&()");
 		update_engine_->get();

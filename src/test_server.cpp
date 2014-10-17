@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
         shared_integer_list[0] = shared_integer_list[1] + 1;
         shared_integer_list[1] = shared_integer_list[0] + 1;
         
-        test_function(shared_integer_list[2]);
+        //test_function(shared_integer_list[2]);
 
         for(const auto& integer : shared_integer_list.get())
 			ROS_INFO_NAMED(ROS_NAME, "  Intlijst int is: %d", integer);
