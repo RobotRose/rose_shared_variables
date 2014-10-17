@@ -40,9 +40,7 @@ public:
 	}
 
 	~UpdateEngine()
-	{
-		printf("destr. UpdateEngine\n");
-	}
+	{}
 
 	bool host(const bool& read_only = true, const bool& use_updates = true)
 	{
@@ -153,7 +151,7 @@ public:
 		// The server always returns its local version
 		if( not is_server_ and update_required )
 		{
-			ROS_INFO_NAMED(ROS_NAME, "Timeout, aksing for update to shared variable server.");
+			ROS_DEBUG_NAMED(ROS_NAME, "Timeout, aksing for update to shared variable server.");
 			if(!getRemote())
 				ROS_WARN_NAMED(ROS_NAME, "Could not get shared variable '%s', using old value.", shared_name_.c_str());
 		}
@@ -164,7 +162,7 @@ public:
 	// This function will be invoked by a client in order to get the state of the variable from the server
 	bool getRemote()
 	{
-		ROS_INFO_NAMED(ROS_NAME, "Getting shared variable '%s' using the 'get' service.", shared_name_.c_str());
+		ROS_DEBUG_NAMED(ROS_NAME, "Getting shared variable '%s' using the 'get' service.", shared_name_.c_str());
 		
 		// Check if remote is available
 		if(!remoteAvailable(service_client_get_))
@@ -188,7 +186,7 @@ public:
 	// This function will be invoked by a client in order to change the variable at the server
 	bool setRemote()
 	{
-		ROS_INFO_NAMED(ROS_NAME, "Setting shared variable '%s' using the 'set' service.", shared_name_.c_str());
+		ROS_DEBUG_NAMED(ROS_NAME, "Setting shared variable '%s' using the 'set' service.", shared_name_.c_str());
 
 		// Check if remote is available
 		if(!remoteAvailable(service_client_get_))
@@ -210,7 +208,7 @@ public:
 	{
 		if(use_updates_)
         {
-            ROS_INFO_NAMED(ROS_NAME, "Publishing shared variable update via '%s'.", topic_name_updates_.c_str());
+            ROS_DEBUG_NAMED(ROS_NAME, "Publishing shared variable update via '%s'.", topic_name_updates_.c_str());
 			updates_publisher_.publish(ros::conversion::convert<T>().get(value_));
         }
 
@@ -239,7 +237,7 @@ private:
 			return false;
 		}
 
-		ROS_INFO_NAMED(ROS_NAME, "Received shared variable 'set' service request.");
+		ROS_DEBUG_NAMED(ROS_NAME, "Received shared variable 'set' service request.");
 		value_ 			= ros::conversion::convert<T>().get(req);
 		res 				= ros::conversion::convert<T>().get(value_); 
 		
@@ -249,7 +247,7 @@ private:
 	// Is invoked at the server when an client calls its 'get variable' service
 	bool CB_get(messageType & req, messageType & res)
 	{
-		ROS_INFO_NAMED(ROS_NAME, "Received shared variable 'get' service request.");
+		ROS_DEBUG_NAMED(ROS_NAME, "Received shared variable 'get' service request.");
 		res = ros::conversion::convert<T>().get(value_);
 		return true;
 	} 
@@ -257,7 +255,7 @@ private:
 	// Is invoked at the client when the server sends an update of this variable via pub/sub
 	void CB_update(const boost::shared_ptr<messageType const>&  update)
 	{
-		ROS_INFO_NAMED(ROS_NAME, "Update of shared variable received from server.");
+		ROS_DEBUG_NAMED(ROS_NAME, "Update of shared variable received from server.");
 		value_ = ros::conversion::convert<T>().get(*update);
 
 		// Store the time of the last update
