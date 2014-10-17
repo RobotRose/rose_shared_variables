@@ -47,10 +47,6 @@ template <typename T, typename E = T>
 class SharedVariable
 {
 public:
-	SharedVariable()
-		: shared_value_(new T())
-	{}
-
 	SharedVariable(const std::string& variable_name)
 		: shared_value_(new T())
 	{
