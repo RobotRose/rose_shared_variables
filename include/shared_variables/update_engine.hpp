@@ -151,7 +151,7 @@ public:
 		// The server always returns its local version
 		if( not is_server_ and update_required )
 		{
-			ROS_DEBUG_NAMED(ROS_NAME, "Timeout, aksing for update to shared variable server.");
+			ROS_INFO_NAMED(ROS_NAME, "Timeout, aksing for update to shared variable server.");
 			if(!getRemote())
 				ROS_WARN_NAMED(ROS_NAME, "Could not get shared variable '%s', using old value.", shared_name_.c_str());
 		}
@@ -162,7 +162,7 @@ public:
 	// This function will be invoked by a client in order to get the state of the variable from the server
 	bool getRemote()
 	{
-		ROS_DEBUG_NAMED(ROS_NAME, "Getting shared variable '%s' using the 'get' service.", shared_name_.c_str());
+		ROS_INFO_NAMED(ROS_NAME, "Getting shared variable '%s' using the 'get' service.", shared_name_.c_str());
 		
 		// Check if remote is available
 		if(!remoteAvailable(service_client_get_))
@@ -186,7 +186,7 @@ public:
 	// This function will be invoked by a client in order to change the variable at the server
 	bool setRemote()
 	{
-		ROS_DEBUG_NAMED(ROS_NAME, "Setting shared variable '%s' using the 'set' service.", shared_name_.c_str());
+		ROS_INFO_NAMED(ROS_NAME, "Setting shared variable '%s' using the 'set' service.", shared_name_.c_str());
 
 		// Check if remote is available
 		if(!remoteAvailable(service_client_get_))
@@ -208,7 +208,7 @@ public:
 	{
 		if(use_updates_)
         {
-            ROS_DEBUG_NAMED(ROS_NAME, "Publishing shared variable update via '%s'.", topic_name_updates_.c_str());
+            ROS_INFO_NAMED(ROS_NAME, "Publishing shared variable update via '%s'.", topic_name_updates_.c_str());
 			updates_publisher_.publish(ros::conversion::convert<T>().get(value_));
         }
 
