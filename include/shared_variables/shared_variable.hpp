@@ -122,23 +122,77 @@ public:
 		return *shared_value_;
 	}
 
-	// operator const T&()
-	// {
-	// 	ROS_INFO("Conversion operator SharedVariable");
-	// 	update_engine_->get();
-	// 	return *shared_value_;
-	// }
-
 	template<typename U = T>
 	typename std::enable_if<is_vector<U>::value, SharedVariable<typename U::value_type, U> >::type
 	operator[](unsigned int idx)
   	{
-		ROS_INFO_NAMED(ROS_NAME, "vector[] operator SharedVariable");
 		update_engine_->get();
 
 		SharedVariable<typename U::value_type, U> sv(&(*shared_value_).at(idx), update_engine_);
 		return sv;
   	}
+
+  	template<typename U = T>
+	typename std::enable_if<is_vector<U>::value, void>::type
+	push_back(const typename U::value_type& new_elem)
+  	{
+  		update_engine_->get();
+  		shared_value_->push_back(new_elem);
+		update_engine_->set();
+  	}
+
+  				
+  	template<typename U = T>
+	typename std::enable_if<is_vector<U>::value, void>::type
+	erase(unsigned int idx)
+  	{
+  		update_engine_->get();
+  		auto it = shared_value_->begin(); 
+  		std::next(it, idx);
+  		shared_value_->erase(it);
+		update_engine_->set();
+  	}
+
+  	template<typename U = T>
+	typename std::enable_if<is_vector<U>::value, typename U::iterator>::type
+	begin()
+  	{
+  		update_engine_->get();
+  		return shared_value_->begin();
+  	}
+
+  	template<typename U = T>
+	typename std::enable_if<is_vector<U>::value, typename U::iterator>::type 
+	end()
+  	{
+  		update_engine_->get();
+  		return shared_value_->end();
+  	}
+
+  	template<typename U = T>
+	typename std::enable_if<is_vector<U>::value, unsigned int>::type 
+	size()
+  	{
+  		update_engine_->get();
+  		return shared_value_->size();
+  	}
+
+  	template<typename U = T>
+	typename std::enable_if<is_vector<U>::value, SharedVariable<typename U::value_type, U>>::type 
+	front()
+  	{
+  		update_engine_->get();
+  		return (*this)[0];
+  	}
+
+  	template<typename U = T>
+	typename std::enable_if<is_vector<U>::value, SharedVariable<typename U::value_type, U>>::type 
+	back()
+  	{
+  		update_engine_->get();
+  		return (*this)[shared_value_->size() - 1];
+  	}
+
 
 private:
 	T* 										shared_value_;
