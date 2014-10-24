@@ -17,12 +17,14 @@
 namespace shared_variables
 {
 
+
 template < typename T >
 class UpdateEngine
 {
 public:
 	typedef typename ros::conversion::convert<T>::nativeType 	nativeType;
 	typedef typename ros::conversion::convert<T>::messageType 	messageType;
+	typedef typename boost::function<void (const T& update) > 	changeCallbackType;
 
 	UpdateEngine(const std::string& variable_name, T& value)
 		: variable_name_(variable_name)
@@ -32,6 +34,7 @@ public:
 		, read_only_(true)
 		, use_updates_(false)
 		, publish_rate_(ros::Rate(0.0))
+		, value_changed_CB_(NULL)
 	{
 		n_ 						= ros::NodeHandle();
 		shared_name_			= getSharedVariableName(n_, variable_name_);
@@ -122,6 +125,24 @@ public:
 
 		ROS_INFO_NAMED(ROS_NAME, "Shared variable '%s' client created.", shared_name_.c_str());
 
+		return true;
+	}
+
+	bool registerChangeCallback(const UpdateEngine::changeCallbackType callback)
+	{
+		if( not is_client_ )
+		{
+			ROS_ERROR_NAMED(ROS_NAME, "Registering a change callback client is only possible when connect to a shared variable as a client.");
+			return false;
+		}
+
+		value_changed_CB_ = callback;
+		return true;
+	}
+
+	bool unregisterChangeCallback()
+	{
+		value_changed_CB_ = NULL;
 		return true;
 	}
 
@@ -260,7 +281,13 @@ private:
 	void CB_update(const boost::shared_ptr<messageType const>&  update)
 	{
 		ROS_DEBUG_NAMED(ROS_NAME, "Update of shared variable received from server.");
+		auto prev_value_ = value_;
 		value_ = ros::conversion::convert<T>().get(*update);
+
+		// Call custom callback if registered, if the value changed
+		if(prev_value_ != value_ and value_changed_CB_ != NULL)
+			value_changed_CB_(value_);
+
 
 		// Store the time of the last update
 		last_update_received_ = ros::Time::now();
@@ -315,6 +342,8 @@ private:
 	ros::Time 			prev_publish_time_;
 	ros::Duration 		max_age_;
 	ros::Rate 			publish_rate_;
+
+	changeCallbackType 	value_changed_CB_;
 
 };
 

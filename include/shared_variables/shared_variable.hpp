@@ -76,6 +76,17 @@ public:
 		return update_engine_->connect(use_updates, max_age);
 	}
 
+	
+	bool registerChangeCallback(const typename UpdateEngine<E>::changeCallbackType callback)
+	{
+		return update_engine_->registerChangeCallback(callback);
+	}
+
+	bool unregisterChangeCallback()
+	{
+		return update_engine_->unregisterChangeCallback();
+	}
+
 	bool set(const T& value)
 	{
 		*shared_value_ = value;
