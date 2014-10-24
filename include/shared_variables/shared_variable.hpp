@@ -93,7 +93,7 @@ public:
 	// Copy assignment
 	SharedVariable<T, E> operator=(const SharedVariable<T, E>& rhs)
 	{
-		ROS_DEBUG_NAMED(ROS_NAME, "Copy operator: SharedVariable<T, E> operator=(const SharedVariable<T, E>& rhs)");
+		//ROS_DEBUG_NAMED(ROS_NAME, "Copy operator: SharedVariable<T, E> operator=(const SharedVariable<T, E>& rhs)");
 
 		*shared_value_ = *rhs.shared_value_;
 		
@@ -105,7 +105,7 @@ public:
 	// Assignment from native type
 	SharedVariable<T, E>& operator=(T rhs)
 	{
-		ROS_DEBUG_NAMED(ROS_NAME, "Assignment operator: SharedVariable<T, E>& operator=(T rhs)");
+		//ROS_DEBUG_NAMED(ROS_NAME, "Assignment operator: SharedVariable<T, E>& operator=(T rhs)");
 	 	*shared_value_ = rhs;
 	 	update_engine_->set();
 		return *this;
@@ -113,7 +113,7 @@ public:
 
 	operator const T&()
 	{
-		ROS_DEBUG_NAMED(ROS_NAME, "Conversion operator: operator T&()");
+		//ROS_DEBUG_NAMED(ROS_NAME, "Conversion operator: operator T&()");
 		update_engine_->get();
 		return *shared_value_;
 	}
