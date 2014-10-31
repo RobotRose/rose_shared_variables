@@ -136,6 +136,12 @@ public:
 		}
 		else
 		{
+			if( not connected_ )
+			{
+				ROS_WARN_NAMED(ROS_NAME, "Could not set remote variable, bacause not connected.");
+				return false;
+			}
+
 			if(!setRemote())
 			{
 				ROS_WARN_NAMED(ROS_NAME, "Could not set shared variable '%s', not setting value.", shared_name_.c_str());
@@ -150,6 +156,12 @@ public:
 	// The duration indicates the max age of the cached variable
 	bool get()
 	{
+		if( not connected_ )
+		{
+			ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable, because not connected.");
+			return false;
+		}
+
 		// The client has to update if the last update was too long ago
 		bool update_required = (ros::Time::now() - last_update_received_) > max_age_;
 
@@ -164,15 +176,10 @@ public:
 		return true;
 	}
 
+private:
 	// This function will be invoked by a client in order to get the state of the variable from the server
 	bool getRemote()
 	{
-		if( not connected_ )
-		{
-			ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable, because not connected.");
-			return false;
-		}
-
 		ROS_DEBUG_NAMED(ROS_NAME, "Getting shared variable '%s' using the 'get' service.", shared_name_.c_str());
 		
 		// Check if remote is available
@@ -197,12 +204,6 @@ public:
 	// This function will be invoked by a client in order to change the variable at the server
 	bool setRemote()
 	{
-		if( not connected_ )
-		{
-			ROS_WARN_NAMED(ROS_NAME, "Could not set remote variable, bacause not connected.");
-			return false;
-		}
-
 		ROS_DEBUG_NAMED(ROS_NAME, "Setting shared variable '%s' using the 'set' service.", shared_name_.c_str());
 
 		// Check if remote is available
