@@ -31,6 +31,7 @@ public:
 		, value_(value)
 		, is_server_(false)
 		, is_client_(false)
+		, connected_(false)
 		, read_only_(true)
 		, use_updates_(false)
 		, publish_rate_(ros::Rate(0.0))
@@ -92,7 +93,7 @@ public:
 
 	bool connect(const bool& use_updates = true, const ros::Duration& max_age = ros::Duration(-1))
 	{
-		if(is_client_)
+		if(is_client_ and connected_ )
 		{
 			ROS_WARN_NAMED(ROS_NAME, "Already connected to a shared variable '%s', doing nothing.", shared_name_.c_str());
 			return false;
@@ -125,7 +126,9 @@ public:
 
 		ROS_INFO_NAMED(ROS_NAME, "Shared variable '%s' client created.", shared_name_.c_str());
 
-		return true;
+		connected_ = getRemote();
+
+		return connected_;
 	}
 
 	bool registerChangeCallback(const UpdateEngine::changeCallbackType callback)
@@ -154,6 +157,12 @@ public:
 		}
 		else
 		{
+			if( not connected_ )
+			{
+				ROS_WARN_NAMED(ROS_NAME, "Could not set remote variable, bacause not connected.");
+				return false;
+			}
+
 			if(!setRemote())
 			{
 				ROS_WARN_NAMED(ROS_NAME, "Could not set shared variable '%s', not setting value.", shared_name_.c_str());
@@ -168,6 +177,12 @@ public:
 	// The duration indicates the max age of the cached variable
 	bool get()
 	{
+		if( not connected_ )
+		{
+			ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable, because not connected.");
+			return false;
+		}
+
 		// The client has to update if the last update was too long ago
 		bool update_required = (ros::Time::now() - last_update_received_) > max_age_;
 
@@ -182,6 +197,7 @@ public:
 		return true;
 	}
 
+private:
 	// This function will be invoked by a client in order to get the state of the variable from the server
 	bool getRemote()
 	{
@@ -319,6 +335,7 @@ public:
 private:
 	bool 				is_server_;
 	bool 				is_client_;
+	bool 				connected_;
 	bool 				use_updates_;
 	bool 				read_only_;
 
