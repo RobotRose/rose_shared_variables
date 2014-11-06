@@ -45,8 +45,10 @@ int main(int argc, char *argv[])
 		    {
 		    	case 't':	
 		    		shared_bool = true;
+		    		ROS_INFO_NAMED(ROS_NAME, "Set shared variable '%s' to TRUE", name);
 					break;
 				case 'f':	
+					ROS_INFO_NAMED(ROS_NAME, "Set shared variable '%s' to FALSE", name);
 		    		shared_bool = false;
 					break;
 			}
