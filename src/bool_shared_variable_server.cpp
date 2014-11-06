@@ -21,7 +21,7 @@ using namespace shared_variables;
 
 int main(int argc, char *argv[])
 {
-	ros::init(argc, argv, "bool_shared_variable_server");
+	ros::init(argc, argv, "bool_shared_variable_server", ros::init_options::AnonymousName);
 	ros::NodeHandle n;
 	ros::NodeHandle n_p("~");
 	ROS_INFO_NAMED(ROS_NAME, "Started boolean shared variable server.\n");
@@ -32,6 +32,8 @@ int main(int argc, char *argv[])
     	ROS_ERROR_NAMED(ROS_NAME, "Parameter name must be specified.");
     	return 1;
     }
+
+
 	
 	SharedVariable<bool> shared_bool(shared_variable_name);
 	shared_bool.host(true, true);
