@@ -33,6 +33,9 @@ target_link_libraries(test_write_client ${catkin_LIBRARIES} shared_variables)
 add_executable(test_server  src/test_server.cpp)
 target_link_libraries(test_server ${catkin_LIBRARIES} shared_variables)
 
+add_executable(bool_shared_variable_server  src/bool_shared_variable_server.cpp)
+target_link_libraries(bool_shared_variable_server ${catkin_LIBRARIES} shared_variables)
+
 #############
 ## Testing ##
 #############

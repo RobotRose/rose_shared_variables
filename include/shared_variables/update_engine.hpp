@@ -135,7 +135,7 @@ public:
 	{
 		if( not is_client_ )
 		{
-			ROS_ERROR_NAMED(ROS_NAME, "Registering a change callback client is only possible when connect to a shared variable as a client.");
+			ROS_ERROR_NAMED(ROS_NAME, "Registering a change callback client is only possible when connected to a shared variable as a client.");
 			return false;
 		}
 
