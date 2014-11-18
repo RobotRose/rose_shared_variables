@@ -159,7 +159,7 @@ public:
 		{
 			if( not connected_ )
 			{
-				ROS_WARN_NAMED(ROS_NAME, "Could not set remote variable, bacause not connected.");
+				ROS_WARN_NAMED(ROS_NAME, "Could not set remote variable '%s', bacause not connected.", shared_name_.c_str());
 				return false;
 			}
 
@@ -179,7 +179,7 @@ public:
 	{
 		if( not connected_ )
 		{
-			ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable, because not connected.");
+			ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable '%s', because not connected.", shared_name_.c_str());
 			return false;
 		}
 
