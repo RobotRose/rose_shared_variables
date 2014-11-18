@@ -177,7 +177,7 @@ public:
 	// The duration indicates the max age of the cached variable
 	bool get()
 	{
-		if( not connected_ )
+		if( not is_server_ and not connected_ )
 		{
 			ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable '%s', because not connected.", shared_name_.c_str());
 			return false;
