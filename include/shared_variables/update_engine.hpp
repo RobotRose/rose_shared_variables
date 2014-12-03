@@ -14,6 +14,10 @@
 #ifndef UPDATE_ENGINE_HPP
 #define UPDATE_ENGINE_HPP
 
+#include <boost/thread/thread.hpp>
+#include <boost/thread/mutex.hpp>
+#include <boost/bind.hpp>
+
 namespace shared_variables
 {
 
@@ -31,7 +35,6 @@ public:
 		, value_(value)
 		, is_server_(false)
 		, is_client_(false)
-		, connected_(false)
 		, read_only_(true)
 		, use_updates_(false)
 		, publish_rate_(ros::Rate(0.0))
@@ -42,10 +45,16 @@ public:
 		service_name_get_ 		= getServiceGetName(n_, variable_name_);
 		service_name_set_ 		= getServiceSetName(n_, variable_name_);
 		topic_name_updates_   	= getUpdateTopicName(n_, variable_name_);
+
+		setConnected(false);
 	}
 
 	~UpdateEngine()
-	{}
+	{
+		is_client_ = false;
+		is_server_ = false;
+		connect_thread_.join();
+	}
 
 	bool host(const bool& read_only, const bool& use_updates, const ros::Rate& publish_rate)
 	{
@@ -93,11 +102,11 @@ public:
 
 	bool connect(const bool& use_updates = true, const ros::Duration& max_age = ros::Duration(-1))
 	{
-		if(is_client_ and connected_ )
+		if(is_client_ and isConnected() )
 		{
 			ROS_WARN_NAMED(ROS_NAME, "Already connected to a shared variable '%s', doing nothing.", shared_name_.c_str());
 			return false;
-		}
+		}	
 
 		if(is_server_)
 		{
@@ -126,9 +135,16 @@ public:
 
 		ROS_INFO_NAMED(ROS_NAME, "Shared variable '%s' client created.", shared_name_.c_str());
 
-		connected_ = getRemote();
+		// Try to connect, start an thread which will keep trying to connect
+		if( not isConnected() )
+		{
+			connect_thread_ = boost::thread(boost::bind(&UpdateEngine::connect, this));
+		}
 
-		return connected_;
+		// Give some time to connect
+		ros::Duration(0.1).sleep();
+
+		return isConnected();
 	}
 
 	bool registerChangeCallback(const UpdateEngine::changeCallbackType callback)
@@ -157,7 +173,7 @@ public:
 		}
 		else
 		{
-			if( not connected_ )
+			if( not isConnected() )
 			{
 				ROS_WARN_NAMED(ROS_NAME, "Could not set remote variable '%s', bacause not connected.", shared_name_.c_str());
 				return false;
@@ -177,7 +193,7 @@ public:
 	// The duration indicates the max age of the cached variable
 	bool get()
 	{
-		if( not is_server_ and not connected_ )
+		if( not is_server_ and not isConnected() )
 		{
 			ROS_WARN_NAMED(ROS_NAME, "Could not get remote variable '%s', because not connected.", shared_name_.c_str());
 			return false;
@@ -198,6 +214,37 @@ public:
 	}
 
 private:
+	void setConnected(const bool& connected)
+	{
+		boost::mutex::scoped_lock lock(connected_mutex_);
+		connected_ = connected;
+	}
+
+	bool isConnected()
+	{
+		boost::mutex::scoped_lock lock(connected_mutex_);
+		return connected_;
+	}
+
+	void connect()
+	{
+		ros::Rate r(2.0);
+
+		do {
+			ROS_INFO_NAMED(ROS_NAME, "Shared variable '%s' trying to connect.", shared_name_.c_str());
+			
+			// Try connecting
+			setConnected(getRemote());
+			
+			// Check if succesfull
+			if(isConnected())
+				ROS_INFO_NAMED(ROS_NAME, "Shared variable '%s' connected.", shared_name_.c_str());
+			else
+				r.sleep();
+			
+		} while ( is_client_ and not isConnected());
+	}
+
 	// This function will be invoked by a client in order to get the state of the variable from the server
 	bool getRemote()
 	{
@@ -362,6 +409,8 @@ private:
 
 	changeCallbackType 	value_changed_CB_;
 
+	boost::thread 		connect_thread_;
+	boost::mutex 		connected_mutex_;
 };
 
 } // namespace shared_variables
