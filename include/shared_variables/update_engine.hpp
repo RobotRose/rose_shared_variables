@@ -167,7 +167,7 @@ public:
 
 	bool set()
 	{
-		ROS_INFO_NAMED(ROS_NAME, "Setting shared variable '%s'", shared_name_.c_str());
+		ROS_DEBUG_NAMED(ROS_NAME, "Setting shared variable '%s'", shared_name_.c_str());
 
 		if(is_server_)
 		{
