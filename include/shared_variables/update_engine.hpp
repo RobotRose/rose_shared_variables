@@ -327,7 +327,10 @@ private:
 
 		ROS_DEBUG_NAMED(ROS_NAME, "Received shared variable 'set' service request.");
 		value_ 			= ros::conversion::convert<T>().get(req);
-		res 				= ros::conversion::convert<T>().get(value_); 
+		res 			= ros::conversion::convert<T>().get(value_); 
+
+		// Publish this change, which we received from a client
+		publishUpdate();
 		
 		return true;
 	}
