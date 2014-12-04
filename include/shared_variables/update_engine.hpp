@@ -167,6 +167,8 @@ public:
 
 	bool set()
 	{
+		ROS_INFO_NAMED(ROS_NAME, "Setting shared variable '%s'", shared_name_.c_str());
+
 		if(is_server_)
 		{
 			publishUpdate();
@@ -394,7 +396,6 @@ private:
 	std::string 		service_name_get_;
 	std::string 		service_name_set_;
 	std::string 		topic_name_updates_;
-
 
 	ros::NodeHandle 	n_;
 	ros::ServiceClient 	service_client_get_;
