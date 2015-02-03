@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 2.8.3)
 project(shared_variables)
 
 find_package(catkin REQUIRED COMPONENTS
-                    roscpp
-                    rose20_common
-                    luctor_classes)
+	roscpp
+	luctor_classes
+)
 
 
 find_package(Boost REQUIRED)
@@ -14,7 +14,7 @@ set(CMAKE_CXX_FLAGS "-std=c++0x -fPIC -g")
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES shared_variables
-    CATKIN_DEPENDS roscpp rose20_common luctor_classes
+    CATKIN_DEPENDS roscpp luctor_classes
     DEPENDS 
 )
 
