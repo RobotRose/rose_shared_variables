@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	shared_bool.host(true, true);
 
 	do{
-		if(rose20_common::kbhit())
+		if(rose_conversions::kbhit())
 		{
 		    uint c = getchar();
 		    ROS_INFO_NAMED(ROS_NAME, "Key pressed: %c", (char)c);
