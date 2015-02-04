@@ -12,7 +12,7 @@
 ***********************************************************************************/
 
 #include <ros/ros.h>
-#include "rose20_common/common.hpp"
+#include "rose_common/common.hpp"
 
 #include "shared_variables/shared_variable.hpp"
 
