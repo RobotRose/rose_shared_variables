@@ -4,6 +4,7 @@ project(shared_variables)
 find_package(catkin REQUIRED COMPONENTS
 	roscpp
 	luctor_classes
+	rose_conversions
 )
 
 

@@ -13,6 +13,7 @@
 
 #include <ros/ros.h>
 #include "rose_common/common.hpp"
+#include "rose_conversions/conversions.hpp"
 
 #include "shared_variables/shared_variable.hpp"
 
