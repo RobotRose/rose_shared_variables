@@ -21,7 +21,7 @@
 #include <type_traits>
 #include <typeinfo>
 
-#include <rose20_common/ros_name.hpp>
+#include "ros_name/ros_name.hpp"
 
 #include "roscomm/conversion_bool.hpp"
 #include "roscomm/conversion_bool_list.hpp"
