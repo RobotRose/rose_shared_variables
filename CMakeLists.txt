@@ -3,7 +3,7 @@ project(shared_variables)
 
 find_package(catkin REQUIRED COMPONENTS
 	roscpp
-	rose_luctor_classes
+	luctor_classes
 	rose_conversions
 )
 
@@ -15,7 +15,7 @@ set(CMAKE_CXX_FLAGS "-std=c++0x -fPIC -g")
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES shared_variables
-    CATKIN_DEPENDS roscpp rose_luctor_classes
+    CATKIN_DEPENDS roscpp luctor_classes
     DEPENDS 
 )
 
