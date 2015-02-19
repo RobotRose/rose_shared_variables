@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(shared_variables)
+project(rose_shared_variables)
 
 find_package(catkin REQUIRED COMPONENTS
 	roscpp
@@ -13,28 +13,47 @@ find_package(Boost REQUIRED)
 set(CMAKE_CXX_FLAGS "-std=c++0x -fPIC -g")
 
 catkin_package(
-    INCLUDE_DIRS include
-    LIBRARIES shared_variables
-    CATKIN_DEPENDS roscpp luctor_classes
+    INCLUDE_DIRS 
+    	include
+    LIBRARIES 
+    	rose_shared_variables
+    CATKIN_DEPENDS 
+		roscpp 
+		luctor_classes
     DEPENDS 
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/include ${catkin_INCLUDE_DIRS} )
 
-add_library(shared_variables SHARED src/shared_variable.cpp
-									src/common.cpp )
-target_link_libraries(shared_variables ${catkin_LIBRARIES})
+add_library(rose_shared_variables SHARED 
+	src/shared_variable.cpp
+	src/common.cpp 
+)
 
-add_executable(test_read_client  src/test_read_client.cpp)
+target_link_libraries(rose_shared_variables ${catkin_LIBRARIES})
+
+add_executable(test_read_client  
+	src/test_read_client.cpp
+)
+
 target_link_libraries(test_read_client ${catkin_LIBRARIES} shared_variables)
 
-add_executable(test_write_client  src/test_write_client.cpp)
+add_executable(test_write_client  
+	src/test_write_client.cpp
+)
+
 target_link_libraries(test_write_client ${catkin_LIBRARIES} shared_variables)
 
-add_executable(test_server  src/test_server.cpp)
+add_executable(test_server  
+	rc/test_server.cpp
+)
+
 target_link_libraries(test_server ${catkin_LIBRARIES} shared_variables)
 
-add_executable(bool_shared_variable_server  src/bool_shared_variable_server.cpp)
+add_executable(bool_shared_variable_server  
+	src/bool_shared_variable_server.cpp
+)
+
 target_link_libraries(bool_shared_variable_server ${catkin_LIBRARIES} shared_variables)
 
 #############

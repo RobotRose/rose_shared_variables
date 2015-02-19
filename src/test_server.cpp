@@ -14,7 +14,7 @@
 #include <ros/ros.h>
 #include "ros/service_server.h"
 
-#include "shared_variables/shared_variable.hpp"
+#include "rose_shared_variables/shared_variable.hpp"
 
 using namespace rose_shared_variables;
 
