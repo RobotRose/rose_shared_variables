@@ -17,7 +17,7 @@
 
 #include <geometry_msgs/Point.h>
 
-using namespace shared_variables;
+using namespace rose_shared_variables;
 
 int main(int argc, char *argv[])
 {

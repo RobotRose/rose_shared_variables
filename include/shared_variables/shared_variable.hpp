@@ -40,7 +40,7 @@ struct is_vector<std::vector<T, Alloc> > { static const bool value = true; };
 // // template<class K, class T, class Comp, class Alloc> 
 // // struct is_container<std::map<K, T, Comp, Alloc>> : public std::true_type {};
 
-namespace shared_variables
+namespace rose_shared_variables
 {
 
 template <typename T, typename E = T>
@@ -206,6 +206,6 @@ private:
 	std::shared_ptr<UpdateEngine<E>> 		update_engine_;
 };
 
-}; // namespace shared_variables 
+}; // namespace rose_shared_variables 
 
 #endif // shareable_HPP 

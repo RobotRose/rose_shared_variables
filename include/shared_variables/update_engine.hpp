@@ -18,7 +18,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/bind.hpp>
 
-namespace shared_variables
+namespace rose_shared_variables
 {
 
 
@@ -417,6 +417,6 @@ private:
 	boost::mutex 		connected_mutex_;
 };
 
-} // namespace shared_variables
+} // namespace rose_shared_variables
 
 #endif // UPDATE_ENGINE_HPP 

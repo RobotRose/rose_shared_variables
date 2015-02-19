@@ -13,7 +13,7 @@
 
 #include "shared_variables/common.hpp"
 
-namespace shared_variables
+namespace rose_shared_variables
 {
 
 	std::string getSharedVariableName(ros::NodeHandle& n, const std::string& variable_name)
@@ -36,4 +36,4 @@ namespace shared_variables
 		return n.resolveName("/shared_variables/" + variable_name + "/updates");
 	}
 
-}; // namespace shared_variables
+}; // namespace rose_shared_variables

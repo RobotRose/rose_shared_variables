@@ -16,12 +16,12 @@
 #include <ros/ros.h>
 #include <string>
 
-namespace shared_variables
+namespace rose_shared_variables
 {
 	std::string getSharedVariableName(ros::NodeHandle& n, const std::string& variable_name);
 	std::string getServiceGetName(ros::NodeHandle& n, const std::string& variable_name);
 	std::string getServiceSetName(ros::NodeHandle& n, const std::string& variable_name);
 	std::string getUpdateTopicName(ros::NodeHandle& n, const std::string& variable_name);
-}; // namespace shared_variables
+}; // namespace rose_shared_variables
 
 #endif // SHARED_VARIABLES_COMMON_HPP 

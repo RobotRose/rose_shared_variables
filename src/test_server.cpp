@@ -16,7 +16,7 @@
 
 #include "shared_variables/shared_variable.hpp"
 
-using namespace shared_variables;
+using namespace rose_shared_variables;
 
 
 
