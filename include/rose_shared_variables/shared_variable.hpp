@@ -28,8 +28,8 @@
 #include "roscomm/conversion_int32_t.hpp"
 #include "roscomm/conversion_int32_t_list.hpp"
 
-#include "shared_variables/common.hpp"
-#include "shared_variables/update_engine.hpp"
+#include "rose_shared_variables/common.hpp"
+#include "rose_shared_variables/update_engine.hpp"
 
 template <class T>
 struct is_vector { static const bool value = false; };
