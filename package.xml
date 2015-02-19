@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>shared_variables</name>
+  <name>rose_shared_variables</name>
   <version>0.0.0</version>
-  <description>shared_variables package</description>
+  <description>rose_shared_variables package</description>
   <maintainer email="hendriks@robot-rose.nl">Okke Hendriks</maintainer>
 
   <license>BSD</license>

@@ -15,7 +15,7 @@
 #include "rose_common/common.hpp"
 #include "rose_conversions/conversions.hpp"
 
-#include "shared_variables/shared_variable.hpp"
+#include "rose_shared_variables/shared_variable.hpp"
 
 using namespace rose_shared_variables;
 

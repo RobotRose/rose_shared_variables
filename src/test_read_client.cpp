@@ -13,7 +13,7 @@
 
 #include <ros/ros.h>
 
-#include "shared_variables/shared_variable.hpp"
+#include "rose_shared_variables/shared_variable.hpp"
 
 #include <geometry_msgs/Point.h>
 
